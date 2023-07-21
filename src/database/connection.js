@@ -1,5 +1,14 @@
 import * as dotenv from 'dotenv';
-import pkg from 'pg';
-
 dotenv.config();
-const { Pool } = pkg;
+
+import { Sequelize } from 'sequelize';
+
+export const sequelize = new Sequelize(
+  process.env.PG_DATABASE,
+  process.env.PG_USER,
+  process.env.PG_PASSWORD,
+  {
+    host: process.env.PGHOST,
+    dialect: 'postgres',
+  }
+);
