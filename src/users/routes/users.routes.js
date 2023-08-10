@@ -5,9 +5,9 @@ import { usersController } from '../controller/users.controller.js';
 const usersRouter = Router();
 
 usersRouter.get('/', usersController.getUsers);
+usersRouter.get('/:id', usersController.getUser);
 usersRouter.post('/', usersController.createUser);
-usersRouter.put('/', (req, res) => {});
-usersRouter.delete('/:id', (req, res) => {});
-usersRouter.get('/:id', (req, res) => {});
+usersRouter.put('/:id', usersController.updateUser);
+usersRouter.delete('/:id', usersController.deleteUser);
 
 export default usersRouter;

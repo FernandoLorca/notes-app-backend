@@ -13,6 +13,29 @@ const getUsers = async (req, res) => {
   }
 };
 
+const getUser = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const user = await Users.findByPk(id);
+
+    if (!user)
+      return res.status(404).json({
+        ok: false,
+        status: 404,
+        message: 'User not found',
+      });
+
+    res.json(user);
+  } catch (error) {
+    res.status(500).json({
+      ok: false,
+      status: 500,
+      message: error.message,
+    });
+  }
+};
+
 const createUser = async (req, res) => {
   const { name, email, password } = req.body;
 
@@ -35,7 +58,50 @@ const createUser = async (req, res) => {
   }
 };
 
+const updateUser = async (req, res) => {
+  const { id } = req.params;
+  const { name, password } = req.body;
+
+  try {
+    const user = await Users.findByPk(id);
+    user.name = name;
+    user.password = password;
+    await user.save();
+
+    res.json(user);
+  } catch (error) {
+    res.status(500).json({
+      ok: false,
+      status: 500,
+      message: error.message,
+    });
+  }
+};
+
+const deleteUser = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    await Users.destroy({
+      where: {
+        id,
+      },
+    });
+
+    res.sendStatus(204);
+  } catch (error) {
+    res.status(500).json({
+      ok: false,
+      status: 500,
+      message: error.message,
+    });
+  }
+};
+
 export const usersController = {
   getUsers,
+  getUser,
   createUser,
+  updateUser,
+  deleteUser,
 };
