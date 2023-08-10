@@ -4,7 +4,7 @@ dotenv.config();
 
 import app from './app.js';
 import { sequelize } from './database/connection.js';
-('prueba');
+
 const PORT = process.env.SERVER_PORT || 3000;
 const main = async () => {
   try {
