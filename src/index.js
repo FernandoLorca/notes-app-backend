@@ -1,3 +1,4 @@
+// index.js encargado de arrancar la aplicación
 import * as dotenv from 'dotenv';
 dotenv.config();
 
