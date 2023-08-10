@@ -4,9 +4,13 @@ import cors from 'cors';
 import morgan from 'morgan';
 
 import usersRouter from './users/routes/users.routes.js';
-import { sequelize } from './database/connection.js';
 
 const app = express();
+
+// middlewares
+app.use(express.json());
+app.use(cors());
+app.use(morgan('dev'));
 
 app.use(cors());
 app.use(express.json());
