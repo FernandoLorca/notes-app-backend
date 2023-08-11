@@ -24,11 +24,17 @@ export const Users = sequelize.define('users', {
 });
 
 Users.hasMany(Notes, {
-  foreignKey: 'userId',
+  foreignKey: {
+    name: 'userId',
+    allowNull: false,
+  },
   sourceKey: 'id',
 });
 
 Notes.belongsTo(Users, {
-  foreignKey: 'userId',
-  targetId: 'id',
+  foreignKey: {
+    name: 'userId',
+    allowNull: false,
+  },
+  targetKey: 'id',
 });
