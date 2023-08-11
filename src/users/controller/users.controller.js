@@ -1,4 +1,5 @@
 import { Users } from '../models/users.models.js';
+import { Notes } from '../../notes/models/notes.models.js';
 
 const getUsers = async (req, res) => {
   try {
@@ -27,6 +28,37 @@ const getUser = async (req, res) => {
       });
 
     res.json(user);
+  } catch (error) {
+    res.status(500).json({
+      ok: false,
+      status: 500,
+      message: error.message,
+    });
+  }
+};
+
+const getUserTasks = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const notes = await Notes.findAll({
+      where: {
+        userId: id,
+      },
+    });
+
+    if (notes.length === 0)
+      return res.status(404).json({
+        ok: false,
+        status: 404,
+        message: 'Notes not found',
+      });
+
+    res.json({
+      ok: true,
+      status: 200,
+      notes,
+    });
   } catch (error) {
     res.status(500).json({
       ok: false,
@@ -101,6 +133,7 @@ const deleteUser = async (req, res) => {
 export const usersController = {
   getUsers,
   getUser,
+  getUserTasks,
   createUser,
   updateUser,
   deleteUser,
