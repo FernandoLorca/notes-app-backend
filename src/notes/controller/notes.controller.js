@@ -56,13 +56,6 @@ const getNote = async (req, res) => {
 const createNote = async (req, res) => {
   const { title, content, userId } = req.body;
 
-  if (!title || !content || !userId)
-    return res.status(400).json({
-      ok: false,
-      status: 400,
-      message: 'Missing required fields',
-    });
-
   try {
     const note = await Notes.create({ title, content, userId });
     res.status(201).json({
@@ -82,20 +75,6 @@ const createNote = async (req, res) => {
 const updateNote = async (req, res) => {
   const { id } = req.params;
   const { title, content } = req.body;
-
-  if (!id)
-    return res.status(400).json({
-      ok: false,
-      status: 400,
-      message: 'Missing required id field',
-    });
-
-  if (!title || !content)
-    return res.status(400).json({
-      ok: false,
-      status: 400,
-      message: 'Missing required title or content field',
-    });
 
   try {
     const note = await Notes.findByPk(id);
@@ -118,13 +97,6 @@ const updateNote = async (req, res) => {
 
 const deleteNote = async (req, res) => {
   const { id } = req.params;
-
-  if (!id)
-    return res.status(400).json({
-      ok: false,
-      status: 400,
-      message: 'Missing required id field',
-    });
 
   try {
     await Notes.destroy({
