@@ -1,3 +1,8 @@
+import * as dotenv from 'dotenv';
+dotenv.config();
+import jwt from 'jsonwebtoken';
+import bcrypt from 'bcryptjs';
+
 import { Users } from '../models/users.models.js';
 
 const nameEmailPassFormatValidation = (req, res, next) => {
@@ -39,7 +44,7 @@ const nameEmailPassFormatValidation = (req, res, next) => {
   next();
 };
 
-const emailValidation = async (req, res, next) => {
+const emailRepeatValidation = async (req, res, next) => {
   const { email } = req.body;
 
   try {
@@ -67,7 +72,82 @@ const emailValidation = async (req, res, next) => {
   }
 };
 
+const emailPassValidation = async (req, res, next) => {
+  const { email, password } = req.body;
+
+  if (!email || !password)
+    return res.status(400).json({
+      ok: false,
+      status: 400,
+      message: 'Email and password are required',
+    });
+
+  try {
+    const user = await Users.findAll({
+      where: {
+        email,
+      },
+    });
+
+    if (user.length === 0)
+      return res.status(404).json({
+        ok: false,
+        status: 500,
+        message: 'User not found',
+      });
+
+    const passwordVerification = await bcrypt.compare(
+      password,
+      user[0].dataValues.password
+    );
+
+    if (!passwordVerification)
+      return res.status(401).json({
+        ok: false,
+        status: 401,
+        message: 'Invalid password',
+      });
+
+    next();
+  } catch (error) {
+    res.status(500).json({
+      ok: false,
+      status: 500,
+      message: error.message,
+    });
+  }
+};
+
+const tokenValidation = async (req, res, next) => {
+  const bearerHeader = req.headers.authorization;
+
+  if (!bearerHeader)
+    return res.status(401).json({
+      ok: false,
+      status: 401,
+      message: 'Token is required',
+    });
+
+  const token = bearerHeader.split(' ')[1];
+  const payload = jwt.verify(token, process.env.JWT_SECRET);
+
+  if (!payload)
+    return res.status(401).json({
+      ok: false,
+      status: 401,
+      message: 'Invalid token',
+    });
+
+  req.user = {
+    email: payload.email,
+  };
+
+  next();
+};
+
 export const usersMiddlewares = {
   nameEmailPassFormatValidation,
-  emailValidation,
+  emailRepeatValidation,
+  emailPassValidation,
+  tokenValidation,
 };

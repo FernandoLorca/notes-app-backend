@@ -28,43 +28,31 @@ const getUsers = async (req, res) => {
 const getUser = async (req, res) => {
   const { email, password } = req.body;
 
-  if (!email || !password) return res.status(400).json(errorStatusHandler(400));
-
   try {
-    const getUserByEmail = await Users.findAll({
+    const user = await Users.findAll({
       where: {
         email,
       },
     });
 
-    if (getUserByEmail.length === 0)
-      return res.status(404).json(errorStatusHandler(404));
-
-    const passwordVerification = await bcrypt.compare(
-      password,
-      getUserByEmail[0].dataValues.password
-    );
-
-    if (!passwordVerification)
-      return res.status(401).json(errorStatusHandler(401));
-
     res.status(200).json({
       ok: true,
       status: 200,
       user: {
-        id: getUserByEmail[0].dataValues.id,
+        id: user[0].dataValues.id,
+        name: user[0].dataValues.name,
+        email: user[0].dataValues.email,
         token: jwt.sign(
           {
-            name: getUserByEmail[0].dataValues.name,
-            email: getUserByEmail[0].dataValues.email,
+            email: user[0].dataValues.email,
           },
           process.env.JWT_SECRET,
           {
             expiresIn: '10h',
           }
         ),
-        createdAt: getUserByEmail[0].dataValues.createdAt,
-        updatedAt: getUserByEmail[0].dataValues.updatedAt,
+        createdAt: user[0].dataValues.createdAt,
+        updatedAt: user[0].dataValues.updatedAt,
       },
     });
   } catch (error) {

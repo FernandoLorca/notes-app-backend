@@ -6,12 +6,20 @@ import { usersController } from '../controller/users.controller.js';
 const usersRouter = Router();
 
 usersRouter.get('/', usersController.getUsers);
-usersRouter.get('/login', usersController.getUser);
-usersRouter.get('/:id/notes', usersController.getUserTasks);
+usersRouter.get(
+  '/login',
+  usersMiddlewares.emailPassValidation,
+  usersController.getUser
+);
+usersRouter.get(
+  '/:id/notes',
+  usersMiddlewares.tokenValidation,
+  usersController.getUserTasks
+);
 usersRouter.post(
   '/register',
   usersMiddlewares.nameEmailPassFormatValidation,
-  usersMiddlewares.emailValidation,
+  usersMiddlewares.emailRepeatValidation,
   usersController.createUser
 );
 usersRouter.put('/:id', usersController.updateUser);
