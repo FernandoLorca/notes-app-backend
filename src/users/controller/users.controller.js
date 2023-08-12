@@ -1,3 +1,9 @@
+import * as dotenv from 'dotenv';
+dotenv.config();
+
+import jwt from 'jsonwebtoken';
+import bcrypt from 'bcryptjs';
+
 import { Users } from '../models/users.models.js';
 import { Notes } from '../../notes/models/notes.models.js';
 
@@ -72,12 +78,12 @@ const createUser = async (req, res) => {
   const { name, email, password } = req.body;
 
   try {
-    // Con este metodo se crea un nuevo usuario en la base de datos
-    // Esto representa el objeto de la fila que ha sido guardado en la tabla Users
+    const hashedPassword = await bcrypt.hash(password, 10);
+
     const newUser = await Users.create({
       name,
       email,
-      password,
+      password: hashedPassword,
     });
 
     res.send(newUser);
