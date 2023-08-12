@@ -103,7 +103,32 @@ const createUser = async (req, res) => {
       password: hashedPassword,
     });
 
-    res.send(newUser);
+    const user = await Users.findAll({
+      where: {
+        email: newUser.dataValues.email,
+      },
+    });
+
+    res.status(201).json({
+      ok: true,
+      status: 201,
+      user: {
+        id: user[0].dataValues.id,
+        name: user[0].dataValues.name,
+        email: user[0].dataValues.email,
+        token: jwt.sign(
+          {
+            email: user[0].dataValues.email,
+          },
+          process.env.JWT_SECRET,
+          {
+            expiresIn: '10h',
+          }
+        ),
+        createdAt: user[0].dataValues.createdAt,
+        updatedAt: user[0].dataValues.updatedAt,
+      },
+    });
   } catch (error) {
     res.status(500).json({
       ok: false,
