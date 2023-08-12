@@ -106,39 +106,6 @@ const getUserTasks = async (req, res) => {
 const createUser = async (req, res) => {
   const { name, email, password } = req.body;
 
-  if (name.length < 4 || name.length > 20)
-    res.status(400).json({
-      ok: false,
-      status: 400,
-      message: 'Name must be between 4 and 20 characters',
-    });
-
-  const emailValidation = validateEmail => {
-    const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
-    return emailRegex.test(validateEmail);
-  };
-
-  if (!emailValidation(email))
-    return res.status(400).json({
-      ok: false,
-      status: 400,
-      message: 'Invalid email',
-    });
-
-  if (!name || !email || !password)
-    return res.status(400).json({
-      ok: false,
-      status: 400,
-      message: 'Name, email and password are required',
-    });
-
-  if (password.length < 8 || password.length > 32)
-    return res.status(400).json({
-      ok: false,
-      status: 400,
-      message: 'Password must be between 8 and 32 characters',
-    });
-
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
 
