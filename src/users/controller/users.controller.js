@@ -4,13 +4,18 @@ dotenv.config();
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 
+import { errorStatusHandler } from '../../helpers/errorHandler.js';
 import { Users } from '../models/users.models.js';
 import { Notes } from '../../notes/models/notes.models.js';
 
 const getUsers = async (req, res) => {
   try {
     const users = await Users.findAll();
-    res.json(users);
+    res.status(200).json({
+      ok: true,
+      status: 200,
+      users,
+    });
   } catch (error) {
     res.status(500).json({
       ok: false,
@@ -21,19 +26,42 @@ const getUsers = async (req, res) => {
 };
 
 const getUser = async (req, res) => {
-  const { id } = req.params;
+  const { email, password } = req.body;
+
+  if (!email || !password) return res.status(400).json(errorStatusHandler(400));
 
   try {
-    const user = await Users.findByPk(id);
+    const getUserByEmail = await Users.findAll({
+      where: {
+        email,
+      },
+    });
 
-    if (!user)
-      return res.status(404).json({
-        ok: false,
-        status: 404,
-        message: 'User not found',
-      });
+    if (getUserByEmail.length === 0)
+      return res.status(404).json(errorStatusHandler(404));
 
-    res.json(user);
+    const passwordVerification = await bcrypt.compare(
+      password,
+      getUserByEmail[0].dataValues.password
+    );
+
+    if (!passwordVerification)
+      return res.status(401).json(errorStatusHandler(401));
+
+    res.status(200).json({
+      ok: true,
+      status: 200,
+      user: {
+        id: getUserByEmail[0].dataValues.id,
+        name: getUserByEmail[0].dataValues.name,
+        email: getUserByEmail[0].dataValues.email,
+        token: jwt.sign({ email }, process.env.JWT_SECRET, {
+          expiresIn: '10h',
+        }),
+        createdAt: getUserByEmail[0].dataValues.createdAt,
+        updatedAt: getUserByEmail[0].dataValues.updatedAt,
+      },
+    });
   } catch (error) {
     res.status(500).json({
       ok: false,
@@ -54,11 +82,7 @@ const getUserTasks = async (req, res) => {
     });
 
     if (notes.length === 0)
-      return res.status(404).json({
-        ok: false,
-        status: 404,
-        message: 'Notes not found',
-      });
+      return res.status(404).json(errorStatusHandler(404));
 
     res.json({
       ok: true,
