@@ -1,10 +1,21 @@
+import * as dotenv from 'dotenv';
+dotenv.config();
+
+import jwt from 'jsonwebtoken';
+import bcrypt from 'bcryptjs';
+
+import { errorStatusHandler } from '../../helpers/errorHandler.js';
 import { Users } from '../models/users.models.js';
 import { Notes } from '../../notes/models/notes.models.js';
 
 const getUsers = async (req, res) => {
   try {
     const users = await Users.findAll();
-    res.json(users);
+    res.status(200).json({
+      ok: true,
+      status: 200,
+      users,
+    });
   } catch (error) {
     res.status(500).json({
       ok: false,
@@ -15,19 +26,35 @@ const getUsers = async (req, res) => {
 };
 
 const getUser = async (req, res) => {
-  const { id } = req.params;
+  const { email, password } = req.body;
 
   try {
-    const user = await Users.findByPk(id);
+    const user = await Users.findAll({
+      where: {
+        email,
+      },
+    });
 
-    if (!user)
-      return res.status(404).json({
-        ok: false,
-        status: 404,
-        message: 'User not found',
-      });
-
-    res.json(user);
+    res.status(200).json({
+      ok: true,
+      status: 200,
+      user: {
+        id: user[0].dataValues.id,
+        name: user[0].dataValues.name,
+        email: user[0].dataValues.email,
+        token: jwt.sign(
+          {
+            email: user[0].dataValues.email,
+          },
+          process.env.JWT_SECRET,
+          {
+            expiresIn: '10h',
+          }
+        ),
+        createdAt: user[0].dataValues.createdAt,
+        updatedAt: user[0].dataValues.updatedAt,
+      },
+    });
   } catch (error) {
     res.status(500).json({
       ok: false,
@@ -48,11 +75,7 @@ const getUserTasks = async (req, res) => {
     });
 
     if (notes.length === 0)
-      return res.status(404).json({
-        ok: false,
-        status: 404,
-        message: 'Notes not found',
-      });
+      return res.status(404).json(errorStatusHandler(404));
 
     res.json({
       ok: true,
@@ -72,15 +95,40 @@ const createUser = async (req, res) => {
   const { name, email, password } = req.body;
 
   try {
-    // Con este metodo se crea un nuevo usuario en la base de datos
-    // Esto representa el objeto de la fila que ha sido guardado en la tabla Users
+    const hashedPassword = await bcrypt.hash(password, 10);
+
     const newUser = await Users.create({
       name,
       email,
-      password,
+      password: hashedPassword,
     });
 
-    res.send(newUser);
+    const user = await Users.findAll({
+      where: {
+        email: newUser.dataValues.email,
+      },
+    });
+
+    res.status(201).json({
+      ok: true,
+      status: 201,
+      user: {
+        id: user[0].dataValues.id,
+        name: user[0].dataValues.name,
+        email: user[0].dataValues.email,
+        token: jwt.sign(
+          {
+            email: user[0].dataValues.email,
+          },
+          process.env.JWT_SECRET,
+          {
+            expiresIn: '10h',
+          }
+        ),
+        createdAt: user[0].dataValues.createdAt,
+        updatedAt: user[0].dataValues.updatedAt,
+      },
+    });
   } catch (error) {
     res.status(500).json({
       ok: false,

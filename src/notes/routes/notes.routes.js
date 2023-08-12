@@ -1,6 +1,6 @@
 import { Router } from 'express';
 
-import { notesMiddlewares } from '../middleware/notes.middlewares.js';
+import { notesMiddlewares } from '../middlewares/notes.middlewares.js';
 import { notesController } from '../controller/notes.controller.js';
 
 const notesRouter = Router();

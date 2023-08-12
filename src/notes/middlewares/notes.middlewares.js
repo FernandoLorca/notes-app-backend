@@ -13,7 +13,11 @@ const noteIdVerification = async (req, res, next) => {
 
     next();
   } catch (error) {
-    res.status(500).json(errorStatusHandler(500));
+    res.status(500).json({
+      ok: false,
+      status: 500,
+      message: error.message,
+    });
   }
 };
 
@@ -41,7 +45,11 @@ const hasContentToUpdate = async (req, res, next) => {
 
     next();
   } catch (error) {
-    res.status(500).json(errorStatusHandler(500));
+    res.status(500).json({
+      ok: false,
+      status: 500,
+      message: error.message,
+    });
   }
 };
 
