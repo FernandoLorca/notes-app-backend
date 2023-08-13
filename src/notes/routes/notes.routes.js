@@ -13,16 +13,19 @@ notesRouter.get(
 );
 notesRouter.post(
   '/',
+  notesMiddlewares.tokenValidation,
   notesMiddlewares.hasContentToCreate,
   notesController.createNote
 );
 notesRouter.put(
   '/:id',
+  notesMiddlewares.tokenValidation,
   notesMiddlewares.hasContentToUpdate,
   notesController.updateNote
 );
 notesRouter.delete(
   '/:id',
+  notesMiddlewares.tokenValidation,
   notesMiddlewares.noteIdVerification,
   notesController.deleteNote
 );
