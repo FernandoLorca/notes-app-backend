@@ -5,11 +5,6 @@ import { notesController } from '../controller/notes.controller.js';
 
 const notesRouter = Router();
 
-notesRouter.get(
-  '/:id',
-  notesMiddlewares.noteIdVerification,
-  notesController.getNote
-);
 notesRouter.post(
   '/',
   notesMiddlewares.tokenValidation,
