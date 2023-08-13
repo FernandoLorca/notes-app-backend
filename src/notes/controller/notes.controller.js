@@ -54,10 +54,11 @@ const getNote = async (req, res) => {
 };
 
 const createNote = async (req, res) => {
-  const { title, content, userId } = req.body;
+  const { title, content, userId } = req.note;
 
   try {
     const note = await Notes.create({ title, content, userId });
+
     res.status(201).json({
       ok: true,
       status: 201,

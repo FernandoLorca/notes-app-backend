@@ -13,6 +13,7 @@ notesRouter.get(
 );
 notesRouter.post(
   '/',
+  notesMiddlewares.tokenValidation,
   notesMiddlewares.hasContentToCreate,
   notesController.createNote
 );

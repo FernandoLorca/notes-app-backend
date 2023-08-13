@@ -14,7 +14,7 @@ usersRouter.get(
 usersRouter.get(
   '/:id/notes',
   usersMiddlewares.tokenValidation,
-  usersController.getUserTasks
+  usersController.getUserNotes
 );
 usersRouter.post(
   '/register',

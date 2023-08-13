@@ -1,5 +1,35 @@
+import jwt from 'jsonwebtoken';
+
 import { errorStatusHandler } from '../../helpers/errorHandler.js';
 import { Notes } from '../models/notes.models.js';
+
+const tokenValidation = async (req, res, next) => {
+  const bearerHeader = req.headers.authorization;
+
+  if (!bearerHeader)
+    return res.status(401).json({
+      ok: false,
+      status: 401,
+      message: 'Token is required',
+    });
+
+  const token = bearerHeader.split(' ')[1];
+  const payload = jwt.verify(token, process.env.JWT_SECRET);
+
+  if (!payload)
+    return res.status(401).json({
+      ok: false,
+      status: 401,
+      message: 'Invalid token',
+    });
+
+  req.user = {
+    id: payload.id,
+    email: payload.email,
+  };
+
+  next();
+};
 
 const noteIdVerification = async (req, res, next) => {
   const { id } = req.params;
@@ -22,10 +52,17 @@ const noteIdVerification = async (req, res, next) => {
 };
 
 const hasContentToCreate = (req, res, next) => {
-  const { title, content, userId } = req.body;
+  const { title, content } = req.body;
+  const { id } = req.user;
 
-  if (!title || !content || !userId)
+  if (!title || !content || !id)
     return res.status(400).json(errorStatusHandler(400));
+
+  req.note = {
+    title,
+    content,
+    userId: id,
+  };
 
   next();
 };
@@ -54,6 +91,7 @@ const hasContentToUpdate = async (req, res, next) => {
 };
 
 export const notesMiddlewares = {
+  tokenValidation,
   noteIdVerification,
   hasContentToCreate,
   hasContentToUpdate,

@@ -26,7 +26,7 @@ const getUsers = async (req, res) => {
 };
 
 const getUser = async (req, res) => {
-  const { email, password } = req.body;
+  const { email } = req.body;
 
   try {
     const user = await Users.findAll({
@@ -44,6 +44,7 @@ const getUser = async (req, res) => {
         email: user[0].dataValues.email,
         token: jwt.sign(
           {
+            id: user[0].dataValues.id,
             email: user[0].dataValues.email,
           },
           process.env.JWT_SECRET,
@@ -64,10 +65,17 @@ const getUser = async (req, res) => {
   }
 };
 
-const getUserTasks = async (req, res) => {
-  const { id } = req.params;
+const getUserNotes = async (req, res) => {
+  const { email } = req.user;
 
   try {
+    const users = await Users.findAll({
+      where: {
+        email,
+      },
+    });
+    const id = users[0].dataValues.id;
+
     const notes = await Notes.findAll({
       where: {
         userId: id,
@@ -181,7 +189,7 @@ const deleteUser = async (req, res) => {
 export const usersController = {
   getUsers,
   getUser,
-  getUserTasks,
+  getUserNotes,
   createUser,
   updateUser,
   deleteUser,
