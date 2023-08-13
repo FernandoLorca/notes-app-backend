@@ -67,6 +67,7 @@ const getUser = async (req, res) => {
 
 const getUserNotes = async (req, res) => {
   const { email } = req.user;
+  const { name } = req.params;
 
   try {
     const users = await Users.findAll({
@@ -74,21 +75,80 @@ const getUserNotes = async (req, res) => {
         email,
       },
     });
-    const id = users[0].dataValues.id;
 
+    if (users[0].dataValues.name.toLowerCase() !== name.toLowerCase())
+      return res.status(401).json({
+        ok: false,
+        status: 401,
+        message: 'Unauthorized',
+      });
+
+    const id = users[0].dataValues.id;
     const notes = await Notes.findAll({
       where: {
         userId: id,
       },
     });
 
+    console.log(notes);
+
     if (notes.length === 0)
-      return res.status(404).json(errorStatusHandler(404));
+      return res.status(404).json({
+        ok: false,
+        status: 404,
+        message: 'Notes not found',
+      });
 
     res.json({
       ok: true,
       status: 200,
       notes,
+    });
+  } catch (error) {
+    res.status(500).json({
+      ok: false,
+      status: 500,
+      message: error.message,
+    });
+  }
+};
+
+const getUserNote = async (req, res) => {
+  const { email } = req.user;
+  const { name, id } = req.params;
+
+  try {
+    const user = await Users.findAll({
+      where: {
+        email,
+      },
+    });
+
+    if (user[0].dataValues.name.toLowerCase() !== name.toLowerCase())
+      return res.status(401).json({
+        ok: false,
+        status: 401,
+        message: 'Unauthorized',
+      });
+
+    const note = await Notes.findOne({
+      where: {
+        id,
+        userId: user[0].dataValues.id,
+      },
+    });
+
+    if (!note)
+      return res.status(404).json({
+        ok: false,
+        status: 404,
+        message: 'Note not found',
+      });
+
+    res.status(200).json({
+      ok: true,
+      status: 200,
+      note,
     });
   } catch (error) {
     res.status(500).json({
@@ -126,6 +186,7 @@ const createUser = async (req, res) => {
         email: user[0].dataValues.email,
         token: jwt.sign(
           {
+            id: user[0].dataValues.id,
             email: user[0].dataValues.email,
           },
           process.env.JWT_SECRET,
@@ -190,6 +251,7 @@ export const usersController = {
   getUsers,
   getUser,
   getUserNotes,
+  getUserNote,
   createUser,
   updateUser,
   deleteUser,

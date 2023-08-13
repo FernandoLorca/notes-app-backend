@@ -59,6 +59,8 @@ const createNote = async (req, res) => {
   try {
     const note = await Notes.create({ title, content, userId });
 
+    console.log(note);
+
     res.status(201).json({
       ok: true,
       status: 201,

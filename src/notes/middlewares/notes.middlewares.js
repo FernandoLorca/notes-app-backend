@@ -1,6 +1,5 @@
 import jwt from 'jsonwebtoken';
 
-import { errorStatusHandler } from '../../helpers/errorHandler.js';
 import { Notes } from '../models/notes.models.js';
 
 const tokenValidation = async (req, res, next) => {
@@ -65,8 +64,12 @@ const hasContentToCreate = (req, res, next) => {
   const { title, content } = req.body;
   const { id } = req.user;
 
-  if (!title || !content || !id)
-    return res.status(400).json(errorStatusHandler(400));
+  if (!title || !content)
+    return res.status(400).json({
+      ok: false,
+      status: 400,
+      message: 'Title and content are required',
+    });
 
   req.note = {
     title,

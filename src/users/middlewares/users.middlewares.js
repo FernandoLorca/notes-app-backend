@@ -6,6 +6,33 @@ import bcrypt from 'bcryptjs';
 
 import { Users } from '../models/users.models.js';
 
+const tokenValidation = async (req, res, next) => {
+  const bearerHeader = req.headers.authorization;
+
+  if (!bearerHeader)
+    return res.status(401).json({
+      ok: false,
+      status: 401,
+      message: 'Token is required',
+    });
+
+  const token = bearerHeader.split(' ')[1];
+  const payload = jwt.verify(token, process.env.JWT_SECRET);
+
+  if (!payload)
+    return res.status(401).json({
+      ok: false,
+      status: 401,
+      message: 'Invalid token',
+    });
+
+  req.user = {
+    email: payload.email,
+  };
+
+  next();
+};
+
 const nameEmailPassFormatValidation = (req, res, next) => {
   const { name, email, password } = req.body;
 
@@ -21,6 +48,23 @@ const nameEmailPassFormatValidation = (req, res, next) => {
       ok: false,
       status: 400,
       message: 'Name must be between 4 and 20 characters',
+    });
+
+  const validateName = name => {
+    const nameRegex = /^[A-Za-z]+$/;
+
+    if (nameRegex.test(name)) {
+      return true;
+    } else {
+      return false;
+    }
+  };
+
+  if (!validateName(name))
+    return res.status(400).json({
+      ok: false,
+      status: 400,
+      message: 'Name must contain only letters and no spaces',
     });
 
   const emailFormatValidation = validateEmail => {
@@ -117,33 +161,6 @@ const emailPassValidation = async (req, res, next) => {
       message: error.message,
     });
   }
-};
-
-const tokenValidation = async (req, res, next) => {
-  const bearerHeader = req.headers.authorization;
-
-  if (!bearerHeader)
-    return res.status(401).json({
-      ok: false,
-      status: 401,
-      message: 'Token is required',
-    });
-
-  const token = bearerHeader.split(' ')[1];
-  const payload = jwt.verify(token, process.env.JWT_SECRET);
-
-  if (!payload)
-    return res.status(401).json({
-      ok: false,
-      status: 401,
-      message: 'Invalid token',
-    });
-
-  req.user = {
-    email: payload.email,
-  };
-
-  next();
 };
 
 export const usersMiddlewares = {
