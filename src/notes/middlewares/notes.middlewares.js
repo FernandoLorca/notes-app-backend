@@ -34,12 +34,22 @@ const tokenValidation = async (req, res, next) => {
 const noteIdVerification = async (req, res, next) => {
   const { id } = req.params;
 
-  if (!id) return res.status(400).json(errorStatusHandler(400));
+  if (!id)
+    return res.status(400).json({
+      ok: false,
+      status: 400,
+      message: 'Id is required',
+    });
 
   try {
     const note = await Notes.findByPk(id);
 
-    if (!note) return res.status(404).json(errorStatusHandler(404));
+    if (!note)
+      return res.status(404).json({
+        ok: false,
+        status: 404,
+        message: 'Note not found',
+      });
 
     next();
   } catch (error) {
@@ -68,17 +78,31 @@ const hasContentToCreate = (req, res, next) => {
 };
 
 const hasContentToUpdate = async (req, res, next) => {
-  const { id } = req.params;
   const { title, content } = req.body;
+  const { id } = req.params;
 
-  if (!id) return res.status(400).json(errorStatusHandler(400));
-
-  if (!title || !content) return res.status(400).json(errorStatusHandler(400));
+  if (!title || !content || !id)
+    return res.status(400).json({
+      ok: false,
+      status: 400,
+      message: 'Title, content and user id are required',
+    });
 
   try {
     const note = await Notes.findByPk(id);
 
-    if (!note) return res.status(404).json(errorStatusHandler(404));
+    if (!note)
+      return res.status(404).json({
+        ok: false,
+        status: 404,
+        message: 'Note not found',
+      });
+
+    req.note = {
+      id,
+      title,
+      content,
+    };
 
     next();
   } catch (error) {
