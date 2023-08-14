@@ -207,39 +207,28 @@ const createUser = async (req, res) => {
   }
 };
 
-// Esta con consulta debe recibir la contraseña antigua, compararla con la de la base de datos y volver a hashear la nueva contraseña
 const updateUser = async (req, res) => {
-  const { id } = req.params;
-  const { name, password } = req.body;
+  const { name, newPassword } = req.body;
   const { email } = req.user;
 
   try {
-    const userByEmail = await Users.findOne({
+    const user = await Users.findOne({
       where: {
         email,
       },
     });
 
-    const userById = await Users.findOne({
-      where: {
-        id,
-      },
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    user.name = name;
+    user.password = hashedPassword;
+    await user.save();
+
+    res.status(200).json({
+      ok: true,
+      status: 200,
+      user,
     });
-
-    if (userByEmail.dataValues.id !== userById.dataValues.id)
-      return res.status(401).json({
-        ok: false,
-        status: 401,
-        message: 'Unauthorized',
-      });
-
-    // Acá debo comparar la contraseña y despues hashear la nueva para que se guarde en la base de datos.
-
-    userById.name = name;
-    userById.password = password;
-    await userById.save();
-
-    res.json(user);
   } catch (error) {
     res.status(500).json({
       ok: false,
