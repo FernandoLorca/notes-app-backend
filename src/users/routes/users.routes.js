@@ -32,8 +32,18 @@ usersRouter.post(
   usersController.createUser
 );
 
-usersRouter.put('/:id', usersController.updateUser);
+usersRouter.put(
+  '/:id',
+  usersMiddlewares.tokenValidation,
+  usersMiddlewares.hasContentToUpdateUser,
+  usersController.updateUser
+);
 
-usersRouter.delete('/:id', usersController.deleteUser);
+usersRouter.delete(
+  '/:id',
+  usersMiddlewares.tokenValidation,
+  usersMiddlewares.userRemoveValidation,
+  usersController.deleteUser
+);
 
 export default usersRouter;

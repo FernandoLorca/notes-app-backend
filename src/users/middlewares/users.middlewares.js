@@ -163,9 +163,52 @@ const emailPassValidation = async (req, res, next) => {
   }
 };
 
+const hasContentToUpdateUser = async (req, res, next) => {
+  const { name, password } = req.body;
+
+  if (!name || !password)
+    return res.status(400).json({
+      ok: false,
+      status: 400,
+      message: 'Name and password are required',
+    });
+
+  next();
+};
+
+const userRemoveValidation = async (req, res, next) => {
+  const { email } = req.user;
+
+  try {
+    const user = await Users.findAll({
+      where: {
+        email,
+      },
+    });
+
+    if (user.length === 0)
+      res.status(404).json({
+        ok: false,
+        status: 404,
+        message: 'User not found',
+      });
+
+    res.user = user;
+    next();
+  } catch (error) {
+    res.status(500).json({
+      ok: false,
+      status: 500,
+      message: error.message,
+    });
+  }
+};
+
 export const usersMiddlewares = {
   nameEmailPassFormatValidation,
   emailRepeatValidation,
   emailPassValidation,
   tokenValidation,
+  hasContentToUpdateUser,
+  userRemoveValidation,
 };

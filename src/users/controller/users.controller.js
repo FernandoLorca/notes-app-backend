@@ -207,15 +207,37 @@ const createUser = async (req, res) => {
   }
 };
 
+// Esta con consulta debe recibir la contraseña antigua, compararla con la de la base de datos y volver a hashear la nueva contraseña
 const updateUser = async (req, res) => {
   const { id } = req.params;
   const { name, password } = req.body;
+  const { email } = req.user;
 
   try {
-    const user = await Users.findByPk(id);
-    user.name = name;
-    user.password = password;
-    await user.save();
+    const userByEmail = await Users.findOne({
+      where: {
+        email,
+      },
+    });
+
+    const userById = await Users.findOne({
+      where: {
+        id,
+      },
+    });
+
+    if (userByEmail.dataValues.id !== userById.dataValues.id)
+      return res.status(401).json({
+        ok: false,
+        status: 401,
+        message: 'Unauthorized',
+      });
+
+    // Acá debo comparar la contraseña y despues hashear la nueva para que se guarde en la base de datos.
+
+    userById.name = name;
+    userById.password = password;
+    await userById.save();
 
     res.json(user);
   } catch (error) {
@@ -229,7 +251,14 @@ const updateUser = async (req, res) => {
 
 const deleteUser = async (req, res) => {
   const { id } = req.params;
+  const user = res.user;
 
+  if (id !== user[0].dataValues.id.toString())
+    return res.status(401).json({
+      ok: false,
+      status: 401,
+      message: 'Unauthorized',
+    });
   try {
     await Users.destroy({
       where: {
