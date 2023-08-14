@@ -208,16 +208,27 @@ const createUser = async (req, res) => {
 };
 
 const updateUser = async (req, res) => {
-  const { id } = req.params;
-  const { name, password } = req.body;
+  const { name, newPassword } = req.body;
+  const { email } = req.user;
 
   try {
-    const user = await Users.findByPk(id);
+    const user = await Users.findOne({
+      where: {
+        email,
+      },
+    });
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
     user.name = name;
-    user.password = password;
+    user.password = hashedPassword;
     await user.save();
 
-    res.json(user);
+    res.status(200).json({
+      ok: true,
+      status: 200,
+      user,
+    });
   } catch (error) {
     res.status(500).json({
       ok: false,
@@ -229,7 +240,14 @@ const updateUser = async (req, res) => {
 
 const deleteUser = async (req, res) => {
   const { id } = req.params;
+  const user = res.user;
 
+  if (id !== user[0].dataValues.id.toString())
+    return res.status(401).json({
+      ok: false,
+      status: 401,
+      message: 'Unauthorized',
+    });
   try {
     await Users.destroy({
       where: {
