@@ -42,7 +42,7 @@ const getNote = async (req, res) => {
     res.json({
       ok: true,
       status: 200,
-      note,
+      note: [note],
     });
   } catch (error) {
     res.status(500).json({
