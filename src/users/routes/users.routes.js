@@ -1,28 +1,49 @@
-import { Router } from 'express'
+import { Router } from 'express';
 
-import { usersMiddlewares } from '../middlewares/users.middlewares.js'
-import { usersController } from '../controller/users.controller.js'
+import { usersMiddlewares } from '../middlewares/users.middlewares.js';
+import { usersController } from '../controller/users.controller.js';
 
-const usersRouter = Router()
+const usersRouter = Router();
 
-usersRouter.get('/', usersController.getUsers)
-usersRouter.post(
+usersRouter.get('/', usersController.getUsers);
+
+usersRouter.get(
   '/login',
   usersMiddlewares.emailPassValidation,
   usersController.getUser
-)
+);
+
 usersRouter.get(
-  '/:id/notes',
+  '/:name/notes',
   usersMiddlewares.tokenValidation,
   usersController.getUserNotes
-)
+);
+
+usersRouter.get(
+  '/:name/notes/:id',
+  usersMiddlewares.tokenValidation,
+  usersController.getUserNote
+);
+
 usersRouter.post(
   '/register',
   usersMiddlewares.nameEmailPassFormatValidation,
   usersMiddlewares.emailRepeatValidation,
   usersController.createUser
-)
-usersRouter.put('/:id', usersController.updateUser)
-usersRouter.delete('/:id', usersController.deleteUser)
+);
 
-export default usersRouter
+usersRouter.put(
+  '/:id',
+  usersMiddlewares.tokenValidation,
+  usersMiddlewares.hasContentToUpdateUser,
+  usersController.updateUser
+);
+
+usersRouter.delete(
+  '/:id',
+  usersMiddlewares.tokenValidation,
+  usersMiddlewares.userRemoveValidation,
+  usersController.deleteUser
+);
+
+export default usersRouter;
