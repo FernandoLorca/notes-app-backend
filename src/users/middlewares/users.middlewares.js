@@ -17,16 +17,39 @@ const authValidation = async (req, res, next) => {
     });
 
   const token = bearerHeader.split(' ')[1];
-  const payload = jwt.verify(token, process.env.JWT_SECRET);
 
-  if (!payload)
-    return res.status(401).json({
-      ok: false,
-      status: 401,
-      message: 'Invalid token',
+  try {
+    const payload = jwt.verify(token, process.env.JWT_SECRET, {
+      ignoreExpiration: true,
     });
 
-  next();
+    if (!payload)
+      return res.status(401).json({
+        ok: false,
+        status: 401,
+        message: 'Invalid token',
+      });
+
+    const currentTimestamp = Math.floor(Date.now() / 1000);
+    if (payload.exp < currentTimestamp)
+      return res.status(401).json({
+        ok: false,
+        status: 401,
+        message: 'Token has expired',
+      });
+
+    req.user = {
+      email: payload.email,
+    };
+
+    next();
+  } catch (error) {
+    res.status(500).json({
+      ok: false,
+      status: 500,
+      message: error.message,
+    });
+  }
 };
 
 const tokenValidation = async (req, res, next) => {
@@ -40,20 +63,39 @@ const tokenValidation = async (req, res, next) => {
     });
 
   const token = bearerHeader.split(' ')[1];
-  const payload = jwt.verify(token, process.env.JWT_SECRET);
 
-  if (!payload)
-    return res.status(401).json({
-      ok: false,
-      status: 401,
-      message: 'Invalid token',
+  try {
+    const payload = jwt.verify(token, process.env.JWT_SECRET, {
+      ignoreExpiration: true,
     });
 
-  req.user = {
-    email: payload.email,
-  };
+    if (!payload)
+      return res.status(401).json({
+        ok: false,
+        status: 401,
+        message: 'Invalid token',
+      });
 
-  next();
+    const currentTimestamp = Math.floor(Date.now() / 1000);
+    if (payload.exp < currentTimestamp)
+      return res.status(401).json({
+        ok: false,
+        status: 401,
+        message: 'Token has expired',
+      });
+
+    req.user = {
+      email: payload.email,
+    };
+
+    next();
+  } catch (error) {
+    res.status(500).json({
+      ok: false,
+      status: 500,
+      message: error.message,
+    });
+  }
 };
 
 const nameEmailPassFormatValidation = (req, res, next) => {
