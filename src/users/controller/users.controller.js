@@ -25,6 +25,35 @@ const getUsers = async (req, res) => {
   }
 };
 
+const setUserByToken = async (req, res) => {
+  const { email } = req.user;
+
+  try {
+    const user = await Users.findAll({
+      where: {
+        email,
+      },
+    });
+
+    res.status(200).json({
+      ok: true,
+      status: 200,
+      message: 'Token is valid',
+      user: {
+        id: user[0].dataValues.id,
+        name: user[0].dataValues.name,
+        email: user[0].dataValues.email,
+      },
+    });
+  } catch (error) {
+    res.status(500).json({
+      ok: false,
+      status: 500,
+      message: error.message,
+    });
+  }
+};
+
 const getUser = async (req, res) => {
   const { email } = req.body;
 
@@ -268,6 +297,7 @@ const deleteUser = async (req, res) => {
 export const usersController = {
   getUsers,
   getUser,
+  setUserByToken,
   getUserNotes,
   getUserNote,
   createUser,

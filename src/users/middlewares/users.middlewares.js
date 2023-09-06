@@ -6,6 +6,52 @@ import bcrypt from 'bcryptjs';
 
 import { Users } from '../models/users.models.js';
 
+const authValidation = async (req, res, next) => {
+  const bearerHeader = req.headers.authorization;
+
+  if (!bearerHeader)
+    return res.status(401).json({
+      ok: false,
+      status: 401,
+      message: 'Token is required',
+    });
+
+  const token = bearerHeader.split(' ')[1];
+
+  try {
+    const payload = jwt.verify(token, process.env.JWT_SECRET, {
+      ignoreExpiration: true,
+    });
+
+    if (!payload)
+      return res.status(401).json({
+        ok: false,
+        status: 401,
+        message: 'Invalid token',
+      });
+
+    const currentTimestamp = Math.floor(Date.now() / 1000);
+    if (payload.exp < currentTimestamp)
+      return res.status(401).json({
+        ok: false,
+        status: 401,
+        message: 'Token has expired',
+      });
+
+    req.user = {
+      email: payload.email,
+    };
+
+    next();
+  } catch (error) {
+    res.status(500).json({
+      ok: false,
+      status: 500,
+      message: error.message,
+    });
+  }
+};
+
 const tokenValidation = async (req, res, next) => {
   const bearerHeader = req.headers.authorization;
 
@@ -17,20 +63,39 @@ const tokenValidation = async (req, res, next) => {
     });
 
   const token = bearerHeader.split(' ')[1];
-  const payload = jwt.verify(token, process.env.JWT_SECRET);
 
-  if (!payload)
-    return res.status(401).json({
-      ok: false,
-      status: 401,
-      message: 'Invalid token',
+  try {
+    const payload = jwt.verify(token, process.env.JWT_SECRET, {
+      ignoreExpiration: true,
     });
 
-  req.user = {
-    email: payload.email,
-  };
+    if (!payload)
+      return res.status(401).json({
+        ok: false,
+        status: 401,
+        message: 'Invalid token',
+      });
 
-  next();
+    const currentTimestamp = Math.floor(Date.now() / 1000);
+    if (payload.exp < currentTimestamp)
+      return res.status(401).json({
+        ok: false,
+        status: 401,
+        message: 'Token has expired',
+      });
+
+    req.user = {
+      email: payload.email,
+    };
+
+    next();
+  } catch (error) {
+    res.status(500).json({
+      ok: false,
+      status: 500,
+      message: error.message,
+    });
+  }
 };
 
 const nameEmailPassFormatValidation = (req, res, next) => {
@@ -268,6 +333,7 @@ const userRemoveValidation = async (req, res, next) => {
 };
 
 export const usersMiddlewares = {
+  authValidation,
   nameEmailPassFormatValidation,
   emailRepeatValidation,
   emailPassValidation,

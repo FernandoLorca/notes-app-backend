@@ -8,6 +8,13 @@ const usersRouter = Router();
 usersRouter.get('/', usersController.getUsers);
 
 usersRouter.get(
+  '/auth',
+  usersMiddlewares.authValidation,
+  usersMiddlewares.tokenValidation,
+  usersController.setUserByToken
+);
+
+usersRouter.post(
   '/login',
   usersMiddlewares.emailPassValidation,
   usersController.getUser
