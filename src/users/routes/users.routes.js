@@ -20,18 +20,6 @@ usersRouter.post(
   usersController.getUser
 );
 
-usersRouter.get(
-  '/:name/notes',
-  usersMiddlewares.tokenValidation,
-  usersController.getUserNotes
-);
-
-usersRouter.get(
-  '/:name/notes/:id',
-  usersMiddlewares.tokenValidation,
-  usersController.getUserNote
-);
-
 usersRouter.post(
   '/register',
   usersMiddlewares.nameEmailPassFormatValidation,
@@ -53,4 +41,21 @@ usersRouter.delete(
   usersController.deleteUser
 );
 
+usersRouter.get(
+  '/:name/notes',
+  usersMiddlewares.tokenValidation,
+  usersController.getUserNotes
+);
+
+usersRouter.get(
+  '/:name/notes/:id',
+  usersMiddlewares.tokenValidation,
+  usersController.getUserNote
+);
+
+usersRouter.delete(
+  '/:name/notes/:id',
+  usersMiddlewares.tokenValidation,
+  usersController.deleteUserNote
+);
 export default usersRouter;
