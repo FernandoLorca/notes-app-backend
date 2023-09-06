@@ -105,7 +105,10 @@ const getUserNotes = async (req, res) => {
       },
     });
 
-    if (users[0].dataValues.name.toLowerCase() !== name.toLowerCase())
+    if (
+      users[0].dataValues.name.split(' ').join('').toLowerCase() !==
+      name.toLowerCase()
+    )
       return res.status(401).json({
         ok: false,
         status: 401,
