@@ -295,12 +295,64 @@ const getUserNote = async (req, res) => {
   }
 };
 
+const createUserNote = async (req, res) => {
+  const { email } = req.user;
+  const { title, content } = req.body;
+  const { name } = req.params;
+
+  try {
+    const user = await Users.findAll({
+      where: {
+        email,
+      },
+    });
+
+    if (
+      user[0].dataValues.name.split(' ').join('').toLowerCase() !==
+      name.toLowerCase()
+    )
+      return res.status(401).json({
+        ok: false,
+        status: 401,
+        message: 'Unauthorized',
+      });
+
+    const noteCreated = await Notes.create({
+      title,
+      content,
+      userId: user[0].dataValues.id,
+    });
+
+    res.status(201).json({
+      ok: true,
+      status: 201,
+      note: {
+        id: noteCreated.dataValues.id,
+        title: noteCreated.dataValues.title,
+        content: noteCreated.dataValues.content,
+        createdAt: noteCreated.dataValues.createdAt,
+        updatedAt: noteCreated.dataValues.updatedAt,
+      },
+    });
+  } catch (error) {
+    res.status(500).json({
+      ok: false,
+      status: 500,
+      message: error.message,
+    });
+  }
+};
+
 const deleteUserNote = async (req, res) => {
   const { email } = req.user;
   const { name, id } = req.params;
 
   try {
-    const users = await Users.findAll({ where: { email } });
+    const users = await Users.findAll({
+      where: {
+        email,
+      },
+    });
 
     if (
       users[0].dataValues.name.split(' ').join('').toLowerCase() !==
@@ -355,5 +407,6 @@ export const usersController = {
   deleteUser,
   getUserNotes,
   getUserNote,
+  createUserNote,
   deleteUserNote,
 };
