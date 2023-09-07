@@ -18,7 +18,7 @@ const main = async () => {
 
     // Para crear las tablas en la base de datos:
     // El force: true hace una eliminación de las tablas y las vuelve a crear, si no se coloca, solo las crea si no existen. Se utiliza al momento de configurar las tablas.
-    // await sequelize.sync({ force: true });
+    // await sequelize.sync({ alter: true });
 
     await sequelize.sync();
     app.listen(PORT, () => console.log(`Server running on port: ${PORT}`));

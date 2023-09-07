@@ -12,7 +12,7 @@ export const Notes = sequelize.define('notes', {
     allowNull: false,
   },
   content: {
-    type: DataTypes.STRING,
+    type: DataTypes.TEXT,
     allowNull: false,
   },
 });
