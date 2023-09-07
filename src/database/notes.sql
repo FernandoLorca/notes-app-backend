@@ -15,7 +15,7 @@ CREATE TABLE notes(
     notes_id SERIAL PRIMARY KEY,
     user_id integer,
     title varchar(255),
-    context text,
+    content text,
     created_at timestamp,
     updated_at timestamp,
     FOREIGN KEY (user_id) REFERENCES users(user_id)
