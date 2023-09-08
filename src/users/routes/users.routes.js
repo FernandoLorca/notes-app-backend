@@ -59,6 +59,12 @@ usersRouter.post(
   usersController.createUserNote
 );
 
+usersRouter.put(
+  '/:name/notes/:id',
+  usersMiddlewares.tokenValidation,
+  usersController.updateUserNote
+);
+
 usersRouter.delete(
   '/:name/notes/:id',
   usersMiddlewares.tokenValidation,

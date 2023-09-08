@@ -343,6 +343,79 @@ const createUserNote = async (req, res) => {
   }
 };
 
+const updateUserNote = async (req, res) => {
+  const { email } = req.user;
+  const { title, content } = req.body;
+  const { name, id } = req.params;
+
+  if (!title || !content)
+    return res.status(400).json({
+      ok: false,
+      status: 400,
+      message: 'Bad request',
+    });
+
+  try {
+    const user = await Users.findAll({
+      where: {
+        email,
+      },
+    });
+
+    if (user[0].dataValues.name.toLowerCase() !== name)
+      return res.status(401).json({
+        ok: false,
+        status: 401,
+        message: 'Unauthorized',
+      });
+
+    const noteToUpdate = await Notes.findByPk(id);
+
+    if (!noteToUpdate)
+      return res.status(404).json({
+        ok: false,
+        status: 404,
+        message: 'Note not found',
+      });
+
+    if (noteToUpdate.dataValues.userId !== user[0].dataValues.id)
+      return res.status(401).json({
+        ok: false,
+        status: 401,
+        message: 'Unauthorized',
+      });
+
+    if (noteToUpdate.dataValues.id.toString() !== id)
+      return res.status(401).json({
+        ok: false,
+        status: 401,
+        message: 'Unauthorized',
+      });
+
+    noteToUpdate.title = title;
+    noteToUpdate.content = content;
+    await noteToUpdate.save();
+
+    res.status(200).json({
+      ok: true,
+      status: 200,
+      noteUpdated: {
+        id: noteToUpdate.dataValues.id,
+        title: noteToUpdate.dataValues.title,
+        content: noteToUpdate.dataValues.content,
+        createdAt: noteToUpdate.dataValues.createdAt,
+        updatedAt: noteToUpdate.dataValues.updatedAt,
+      },
+    });
+  } catch (error) {
+    res.status(500).json({
+      ok: false,
+      status: 500,
+      message: error.message,
+    });
+  }
+};
+
 const deleteUserNote = async (req, res) => {
   const { email } = req.user;
   const { name, id } = req.params;
@@ -408,5 +481,6 @@ export const usersController = {
   getUserNotes,
   getUserNote,
   createUserNote,
+  updateUserNote,
   deleteUserNote,
 };
