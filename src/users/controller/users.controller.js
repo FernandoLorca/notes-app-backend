@@ -362,7 +362,7 @@ const updateUserNote = async (req, res) => {
       },
     });
 
-    if (user[0].dataValues.name.toLowerCase() !== name)
+    if (user[0].dataValues.name.split(' ').join('').toLowerCase() !== name)
       return res.status(401).json({
         ok: false,
         status: 401,
