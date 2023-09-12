@@ -9,7 +9,7 @@ import { sequelize } from './database/connection.js';
 // import './users/models/users.models.js';
 // import './notes/models/notes.models.js';
 
-const PORT = process.env.SERVER_PORT || 3000;
+const PORT = process.env.PORT || 3000;
 const main = async () => {
   try {
     // Para probar la conexión a la base de datos:
