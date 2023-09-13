@@ -5,8 +5,6 @@ import { usersController } from '../controller/users.controller.js';
 
 const usersRouter = Router();
 
-usersRouter.get('/', usersController.getUsers);
-
 usersRouter.get(
   '/auth',
   usersMiddlewares.authValidation,
@@ -25,20 +23,6 @@ usersRouter.post(
   usersMiddlewares.nameEmailPassFormatValidation,
   usersMiddlewares.emailRepeatValidation,
   usersController.createUser
-);
-
-usersRouter.put(
-  '/:id',
-  usersMiddlewares.tokenValidation,
-  usersMiddlewares.hasContentToUpdateUser,
-  usersController.updateUser
-);
-
-usersRouter.delete(
-  '/:id',
-  usersMiddlewares.tokenValidation,
-  usersMiddlewares.userRemoveValidation,
-  usersController.deleteUser
 );
 
 usersRouter.get(
