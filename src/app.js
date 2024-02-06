@@ -7,7 +7,7 @@ import cors from 'cors';
 import morgan from 'morgan';
 
 import usersRouter from './users/routes/users.routes.js';
-import notesRouter from './notes/routes/notes.routes.js';
+// import notesRouter from './notes/routes/notes.routes.js';
 
 const app = express();
 
@@ -16,6 +16,6 @@ app.use(express.json());
 app.use(cors());
 app.use(morgan('dev'));
 app.use(`${process.env.API_VERSION}/users`, usersRouter);
-app.use(`${process.env.API_VERSION}/notes`, notesRouter);
+// app.use(`${process.env.API_VERSION}/notes`, notesRouter);
 
 export default app;
